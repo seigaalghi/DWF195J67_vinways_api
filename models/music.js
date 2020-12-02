@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Music.belongsTo(models.Artist, { foreignKey: 'artistId', as: 'artist' });
-      Music.belongsToMany(models.User, { through: { model: 'Like' }, foreignKey: 'musicId', as: 'likes' });
+      Music.belongsToMany(models.User, { through: { model: 'Like' }, as: 'likes' });
     }
   }
   Music.init(

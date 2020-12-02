@@ -1,4 +1,5 @@
 const { Music, Artist, User } = require('../../models');
+const Joi = require('joi');
 
 // GET ALL MUSIC
 
@@ -11,10 +12,9 @@ exports.getMusics = async (req, res) => {
       include: [
         {
           model: User,
+          through: { attributes: [] },
           as: 'likes',
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'password', 'premium', 'admin', 'until', 'payment', 'cancel'],
-          },
+          attributes: ['id', 'name', 'email'],
         },
         {
           model: Artist,

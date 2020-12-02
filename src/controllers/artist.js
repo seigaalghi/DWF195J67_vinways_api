@@ -1,11 +1,11 @@
-const { Artist } = require('../../models');
+const { Artist, Music } = require('../../models');
 const Joi = require('joi');
 
 // GET ALL ARTIST
 
 exports.getArtists = async (req, res) => {
   try {
-    const artists = await Artist.findAll({ include: 'musics' });
+    const artists = await Artist.findAll({ attributes: { exclude: ['createdAt', 'updatedAt'] }, include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } } });
     res.status(200).json({
       status: 'success',
       data: {
