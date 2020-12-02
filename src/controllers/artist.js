@@ -27,7 +27,7 @@ exports.getArtists = async (req, res) => {
 exports.getArtist = async (req, res) => {
   const id = req.params.id;
   try {
-    const artist = await Artist.findOne({ include: 'musics', where: { id: id } });
+    const artist = await Artist.findOne({ attributes: { exclude: ['createdAt', 'updatedAt'] }, include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } } });
     res.status(200).json({
       status: 'success',
       data: {
