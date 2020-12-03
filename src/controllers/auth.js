@@ -58,8 +58,84 @@ exports.register = async (req, res) => {
       status: 'success',
       message: 'Registered successfully',
       data: {
-        email: user.email,
-        token,
+        user: {
+          email: user.email,
+          token,
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: 'error',
+      error: {
+        message: 'Internal Server Error',
+      },
+    });
+  }
+};
+
+// =================================================================================
+// LOGIN
+// =================================================================================
+
+exports.login = async (req, res) => {
+  const body = req.body;
+  const { email, password } = body;
+
+  try {
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(6).required(),
+    });
+
+    const { error } = schema.validate({ ...body }, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).json({
+        status: 'failed',
+        message: error.details[0].message,
+        errors: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const user = await User.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Wrong email or password',
+      });
+    }
+
+    const validate = await bcrypt.compare(password, user.password);
+
+    if (!validate) {
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Wrong email or password',
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+      },
+      process.env.SECRET_TOKEN
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Logged in successfully',
+      data: {
+        user: {
+          email,
+          token,
+        },
       },
     });
   } catch (error) {

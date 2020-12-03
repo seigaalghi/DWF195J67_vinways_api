@@ -34,7 +34,7 @@ const { getTransactions, getTransaction, postTransaction, putTransaction, delete
 // Transaction Actions
 // =============================================
 
-const { register } = require('../controllers/auth');
+const { register, login } = require('../controllers/auth');
 
 // ============================================================================================
 // ROUTING
@@ -83,5 +83,6 @@ router.delete('/transaction/:id', deleteTransaction);
 // =============================================
 
 router.post('/register', register);
+router.post('/login', login);
 
 module.exports = router;
