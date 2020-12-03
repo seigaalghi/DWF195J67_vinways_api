@@ -5,7 +5,10 @@ const Joi = require('joi');
 
 exports.getArtists = async (req, res) => {
   try {
-    const artists = await Artist.findAll({ attributes: { exclude: ['createdAt', 'updatedAt'] }, include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } } });
+    const artists = await Artist.findAll({
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    });
     res.status(200).json({
       status: 'success',
       data: {
@@ -15,6 +18,7 @@ exports.getArtists = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.satus(500).json({
+      status: 'error',
       error: {
         message: 'Internal Server Error',
       },
@@ -27,7 +31,21 @@ exports.getArtists = async (req, res) => {
 exports.getArtist = async (req, res) => {
   const id = req.params.id;
   try {
-    const artist = await Artist.findOne({ attributes: { exclude: ['createdAt', 'updatedAt'] }, include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } } });
+    const artist = await Artist.findOne({
+      where: { id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    });
+
+    if (!artist) {
+      res.status(400).json({
+        status: 'error',
+        error: {
+          message: `No Artist Found with ID of ${id}`,
+        },
+      });
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -37,6 +55,7 @@ exports.getArtist = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.satus(500).json({
+      status: 'error',
       error: {
         message: 'Internal Server Error',
       },
@@ -61,7 +80,7 @@ exports.postArtist = async (req, res) => {
 
     if (error) {
       return res.status(400).send({
-        status: 'failed',
+        status: 'error',
         error: {
           message: error.details.map((detail) => detail.message),
         },
@@ -78,22 +97,29 @@ exports.postArtist = async (req, res) => {
 
     if (!artist) {
       return res.status(400).send({
-        status: 'failed',
+        status: 'error',
         error: {
           message: 'Failed to add artist please try again',
         },
       });
     }
 
+    const response = await Artist.findOne({
+      where: { id: artist.id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    });
+
     res.status(200).json({
       status: 'success',
       data: {
-        artist,
+        artist: response,
       },
     });
   } catch (error) {
     console.log(error);
     res.satus(500).json({
+      status: 'error',
       error: {
         message: 'Internal Server Error',
       },
@@ -119,7 +145,7 @@ exports.putArtist = async (req, res) => {
 
     if (error) {
       return res.status(400).send({
-        status: 'failed',
+        status: 'error',
         error: {
           message: error.details.map((detail) => detail.message),
         },
@@ -142,28 +168,38 @@ exports.putArtist = async (req, res) => {
 
     if (!artist) {
       return res.status(400).send({
-        status: 'failed',
+        status: 'error',
         error: {
           message: 'Failed to edit artist please try again',
         },
       });
     }
 
+    const response = await Artist.findOne({
+      where: { id: id },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    });
+
     res.status(200).json({
       status: 'success',
       data: {
-        artist,
+        artist: response,
       },
     });
   } catch (error) {
     console.log(error);
     res.satus(500).json({
+      status: 'error',
       error: {
         message: 'Internal Server Error',
       },
     });
   }
 };
+
+// Delete Artist
+
 exports.deleteArtist = async (req, res) => {
   const id = req.params.id;
   try {
@@ -177,6 +213,7 @@ exports.deleteArtist = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.satus(500).json({
+      status: 'error',
       error: {
         message: 'Internal Server Error',
       },

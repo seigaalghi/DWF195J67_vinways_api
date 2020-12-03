@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-exports.imageUpload = (fileName) => {
+exports.fileUpload = (image, audio) => {
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'uploads');
@@ -30,24 +30,36 @@ exports.imageUpload = (fileName) => {
   });
 
   const fileFilter = (req, file, cb) => {
-    if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|svg|SVG)$/)) {
-      req.fileValidationError = {
-        message: 'Please select image files only',
-      };
-      return cb(new Error('Please select image files only'), false);
+    if (file.fieldName === audio) {
+      if (!file.originalname.match(/\.(mp3|MP3|ogg|OGG|m4a|M4A|aac|AAC|flac|FLAC|wav|WAV)$/)) {
+        req.fileValidationError = {
+          message: 'Please select audio files only',
+        };
+        return cb(new Error('Please select audio files only'), false);
+      }
+    }
+    if (file.fieldName === image) {
+      if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|svg|SVG)$/)) {
+        req.fileValidationError = {
+          message: 'Please select image files only',
+        };
+        return cb(new Error('Please select image files only'), false);
+      }
     }
     cb(null, true);
   };
 
+  const fileSize = 20 * 1024 * 1024;
+
   const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
+    storage,
+    fileFilter,
     limits: {
-      fileSize: 3072000,
+      fileSize,
     },
   }).fields([
-    { name: fileName, maxCount: 1 },
-    { name: fileName, maxCount: 1 },
+    { name: image, maxCount: 1 },
+    { name: audio, maxCount: 1 },
   ]);
 
   return (req, res, next) => {
