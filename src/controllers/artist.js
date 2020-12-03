@@ -11,6 +11,7 @@ exports.getArtists = async (req, res) => {
     });
     res.status(200).json({
       status: 'success',
+      message: 'Artist loaded successfully',
       data: {
         artists,
       },
@@ -39,15 +40,14 @@ exports.getArtist = async (req, res) => {
 
     if (!artist) {
       res.status(400).json({
-        status: 'error',
-        error: {
-          message: `No Artist Found with ID of ${id}`,
-        },
+        status: 'failed',
+        message: `No Artist Found with ID of ${id}`,
       });
     }
 
     res.status(200).json({
       status: 'success',
+      message: 'Artist loaded successfully',
       data: {
         artist,
       },
@@ -74,16 +74,19 @@ exports.postArtist = async (req, res) => {
       age: Joi.number().required(),
       type: Joi.string().required(),
       start: Joi.number().required(),
+      img: Joi.string().required(),
     });
 
-    const { error } = schema.validate(req.body, { abortEarly: false });
+    const { error } = schema.validate(
+      { ...req.body, img: file.img ? file.img[0].filename : null },
+      { abortEarly: false }
+    );
 
     if (error) {
       return res.status(400).send({
-        status: 'error',
-        error: {
-          message: error.details.map((detail) => detail.message),
-        },
+        status: 'failed',
+        message: error.details[0].message,
+        errors: error.details.map((detail) => detail.message),
       });
     }
 
@@ -96,11 +99,9 @@ exports.postArtist = async (req, res) => {
     });
 
     if (!artist) {
-      return res.status(400).send({
-        status: 'error',
-        error: {
-          message: 'Failed to add artist please try again',
-        },
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Failed to add artist please try again',
       });
     }
 
@@ -112,6 +113,7 @@ exports.postArtist = async (req, res) => {
 
     res.status(200).json({
       status: 'success',
+      message: 'Artist added successfully',
       data: {
         artist: response,
       },
@@ -141,14 +143,16 @@ exports.putArtist = async (req, res) => {
       start: Joi.number().required(),
     });
 
-    const { error } = schema.validate(req.body, { abortEarly: false });
+    const { error } = schema.validate(
+      { ...req.body, img: file.img ? file.img[0].filename : null },
+      { abortEarly: false }
+    );
 
     if (error) {
       return res.status(400).send({
-        status: 'error',
-        error: {
-          message: error.details.map((detail) => detail.message),
-        },
+        status: 'failed',
+        message: error.details[0].message,
+        errors: error.details.map((detail) => detail.message),
       });
     }
     const artist = await Artist.update(
@@ -167,11 +171,9 @@ exports.putArtist = async (req, res) => {
     );
 
     if (!artist) {
-      return res.status(400).send({
-        status: 'error',
-        error: {
-          message: 'Failed to edit artist please try again',
-        },
+      return res.status(400).json({
+        status: 'failed',
+        message: 'Failed to edit artist please try again',
       });
     }
 
@@ -183,6 +185,7 @@ exports.putArtist = async (req, res) => {
 
     res.status(200).json({
       status: 'success',
+      message: 'Artist edited successfully',
       data: {
         artist: response,
       },
@@ -206,9 +209,7 @@ exports.deleteArtist = async (req, res) => {
     await Artist.destroy({ where: { id: id } });
     res.status(200).json({
       status: 'success',
-      data: {
-        message: 'Deleted Successfuly',
-      },
+      message: 'Artist deleted successfully',
     });
   } catch (error) {
     console.log(error);

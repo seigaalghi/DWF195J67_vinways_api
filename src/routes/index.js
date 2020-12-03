@@ -4,7 +4,7 @@ const { fileUpload } = require('../../middlewares/fileUpload');
 
 // Function Import
 
-const { getMusics, getMusic, postMusic } = require('../controllers/music');
+// Artist Actions
 const {
   getArtists,
   getArtist,
@@ -13,10 +13,19 @@ const {
   deleteArtist,
 } = require('../controllers/artist');
 
+// Music Actions
+const { getMusics, getMusic, postMusic, putMusic, deleteMusic } = require('../controllers/music');
+
+// User Actions
+
+// const { getUsers, getUser, postUser, putUser, deleteUser } = require('../controllers/user');
+
 // Music
 router.get('/musics', getMusics);
 router.get('/music/:id', getMusic);
 router.post('/music', fileUpload('img', 'audio'), postMusic);
+router.put('/music/:id', fileUpload('img', 'audio'), putMusic);
+router.delete('/music/:id', deleteMusic);
 
 // Artist
 router.get('/artists', getArtists);
@@ -25,6 +34,11 @@ router.delete('/artist/:id', deleteArtist);
 router.put('/artist/:id', fileUpload('img', null), putArtist);
 router.post('/artist/', fileUpload('img', null), postArtist);
 
-// User
+// // User
+// router.get('/users', getUsers);
+// router.get('/user', getUser);
+// router.post('/user', postUser);
+// router.put('/user/:id', putUser);
+// router.delete('/user/:id', deleteUser);
 
 module.exports = router;
