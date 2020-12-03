@@ -1,7 +1,9 @@
 const { Music, Artist, User } = require('../../models');
 const Joi = require('joi');
 
-// GET ALL MUSIC
+// =================================================================================
+// GET MUSICS
+// =================================================================================
 
 exports.getMusics = async (req, res) => {
   try {
@@ -41,7 +43,9 @@ exports.getMusics = async (req, res) => {
   }
 };
 
+// =================================================================================
 // GET MUSIC BY ID
+// =================================================================================
 
 exports.getMusic = async (req, res) => {
   const id = req.params.id;
@@ -89,7 +93,9 @@ exports.getMusic = async (req, res) => {
   }
 };
 
+// =================================================================================
 // POST MUSIC
+// =================================================================================
 
 exports.postMusic = async (req, res) => {
   const body = req.body;
@@ -115,7 +121,7 @@ exports.postMusic = async (req, res) => {
     if (error) {
       return res.status(400).send({
         status: 'failed',
-        message: error.detauls[0].message,
+        message: error.details[0].message,
         errors: error.details.map((detail) => detail.message),
       });
     }
@@ -171,13 +177,14 @@ exports.postMusic = async (req, res) => {
   }
 };
 
+// =================================================================================
 // EDIT MUSIC
+// =================================================================================
 
 exports.putMusic = async (req, res) => {
   const body = req.body;
   const file = req.files;
   const id = req.params.id;
-  console.log(id);
   try {
     const schema = Joi.object({
       title: Joi.string().required(),
@@ -199,7 +206,7 @@ exports.putMusic = async (req, res) => {
     if (error) {
       return res.status(400).send({
         status: 'failed',
-        message: error.detauls[0].message,
+        message: error.details[0].message,
         errors: error.details.map((detail) => detail.message),
       });
     }
@@ -263,7 +270,9 @@ exports.putMusic = async (req, res) => {
   }
 };
 
+// =================================================================================
 // DELETE MUSIC
+// =================================================================================
 
 exports.deleteMusic = async (req, res) => {
   const id = req.params.id;

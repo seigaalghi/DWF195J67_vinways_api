@@ -1,21 +1,29 @@
-const { Artist, Music } = require('../../models');
+const { Transaction, User } = require('../../models');
 const Joi = require('joi');
 
 // =================================================================================
-// GET ARTIST
+// GET TRANSACTIONS
 // =================================================================================
 
-exports.getArtists = async (req, res) => {
+exports.getTransactions = async (req, res) => {
   try {
-    const artists = await Artist.findAll({
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
-      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    const transactions = await Transaction.findAll({
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'userId'],
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'until'],
+        },
+      ],
     });
     res.status(200).json({
       status: 'success',
-      message: 'Artist loaded successfully',
+      message: 'Transactions loaded successfully',
       data: {
-        artists,
+        transactions,
       },
     });
   } catch (error) {
@@ -30,30 +38,36 @@ exports.getArtists = async (req, res) => {
 };
 
 // =================================================================================
-// GET ARTIST BY ID
+// GET TRANSACTION BY ID
 // =================================================================================
 
-exports.getArtist = async (req, res) => {
+exports.getTransaction = async (req, res) => {
   const id = req.params.id;
   try {
-    const artist = await Artist.findOne({
+    const transaction = await Transaction.findOne({
       where: { id },
       attributes: { exclude: ['createdAt', 'updatedAt'] },
-      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'until'],
+        },
+      ],
     });
 
-    if (!artist) {
+    if (!transaction) {
       res.status(400).json({
         status: 'failed',
-        message: `No Artist Found with ID of ${id}`,
+        message: `No transaction found with ID of ${id}`,
       });
     }
 
     res.status(200).json({
       status: 'success',
-      message: 'Artist loaded successfully',
+      message: 'Transaction loaded successfully',
       data: {
-        artist,
+        transaction,
       },
     });
   } catch (error) {
@@ -68,23 +82,24 @@ exports.getArtist = async (req, res) => {
 };
 
 // =================================================================================
-// POST ARTIST
+// POST TRANSACTION
 // =================================================================================
 
-exports.postArtist = async (req, res) => {
+exports.postTransaction = async (req, res) => {
   const body = req.body;
   const file = req.files;
   try {
     const schema = Joi.object({
-      name: Joi.string().required(),
-      age: Joi.number().required(),
-      type: Joi.string().required(),
-      start: Joi.number().required(),
+      account: Joi.string().required(),
+      userId: Joi.number().required(),
       img: Joi.string().required(),
     });
 
     const { error } = schema.validate(
-      { ...req.body, img: file.img ? file.img[0].filename : null },
+      {
+        ...req.body,
+        img: file.img ? file.img[0].filename : null,
+      },
       { abortEarly: false }
     );
 
@@ -96,32 +111,36 @@ exports.postArtist = async (req, res) => {
       });
     }
 
-    const artist = await Artist.create({
-      name: body.name,
+    const transaction = await Transaction.create({
+      account: body.account,
+      userId: body.userId,
       img: file.img[0].filename,
-      age: body.age,
-      type: body.type,
-      start: body.start,
     });
 
-    if (!artist) {
-      return res.status(400).json({
+    if (!transaction) {
+      res.status(400).json({
         status: 'failed',
-        message: 'Failed to add artist please try again',
+        message: 'Failed to add transaction, please try again',
       });
     }
 
-    const response = await Artist.findOne({
-      where: { id: artist.id },
+    const response = await Transaction.findOne({
+      where: { id: transaction.id },
       attributes: { exclude: ['createdAt', 'updatedAt'] },
-      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'until'],
+        },
+      ],
     });
 
     res.status(200).json({
       status: 'success',
-      message: 'Artist added successfully',
+      message: 'Transaction added successfully',
       data: {
-        artist: response,
+        music: response,
       },
     });
   } catch (error) {
@@ -136,23 +155,25 @@ exports.postArtist = async (req, res) => {
 };
 
 // =================================================================================
-// PUT ARTIST
+// EDIT TRANSACTION
 // =================================================================================
 
-exports.putArtist = async (req, res) => {
-  const id = req.params.id;
+exports.putTransaction = async (req, res) => {
   const body = req.body;
   const file = req.files;
+  const id = req.params.id;
   try {
     const schema = Joi.object({
-      name: Joi.string().required(),
-      age: Joi.number().required(),
-      type: Joi.string().required(),
-      start: Joi.number().required(),
+      account: Joi.string().required(),
+      userId: Joi.number().required(),
+      img: Joi.string().required(),
     });
 
     const { error } = schema.validate(
-      { ...req.body, img: file.img ? file.img[0].filename : null },
+      {
+        ...req.body,
+        img: file.img ? file.img[0].filename : null,
+      },
       { abortEarly: false }
     );
 
@@ -163,45 +184,49 @@ exports.putArtist = async (req, res) => {
         errors: error.details.map((detail) => detail.message),
       });
     }
-    const artist = await Artist.update(
+
+    const transaction = await Transaction.update(
       {
-        name: body.name,
+        account: body.account,
+        userId: body.userId,
         img: file.img[0].filename,
-        age: body.age,
-        start: body.start,
-        type: body.type,
-        updatedAt: new Date(),
       },
       {
-        include: 'musics',
-        where: { id: id },
+        where: {
+          id,
+        },
       }
     );
 
-    if (!artist) {
+    if (!transaction) {
       return res.status(400).json({
         status: 'failed',
-        message: 'Failed to edit artist please try again',
+        message: 'Failed to edit transaction, please try again',
       });
     }
 
-    const response = await Artist.findOne({
-      where: { id: id },
+    const response = await Transaction.findOne({
+      where: { id },
       attributes: { exclude: ['createdAt', 'updatedAt'] },
-      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'until'],
+        },
+      ],
     });
 
     res.status(200).json({
       status: 'success',
-      message: 'Artist edited successfully',
+      message: 'Transaction edited successfully',
       data: {
-        artist: response,
+        transaction: response,
       },
     });
   } catch (error) {
     console.log(error);
     res.satus(500).json({
-      status: 'error',
       error: {
         message: 'Internal Server Error',
       },
@@ -210,20 +235,36 @@ exports.putArtist = async (req, res) => {
 };
 
 // =================================================================================
-// DELETE ARTIST
+// DELETE MUSIC
 // =================================================================================
 
-exports.deleteArtist = async (req, res) => {
+exports.deleteTransaction = async (req, res) => {
   const id = req.params.id;
   try {
-    await Artist.destroy({ where: { id: id } });
+    const transaction = await Transaction.findOne({ where: { id } });
+    if (!transaction) {
+      res.status(400).json({
+        status: 'failed',
+        message: `No transaction with ID of ${id}`,
+      });
+    }
+
+    const remove = await Transaction.destroy({ where: { id } });
+
+    if (!remove) {
+      res.status(400).json({
+        status: 'failed',
+        message: 'Failed to delete the transaction',
+      });
+    }
+
     res.status(200).json({
       status: 'success',
-      message: 'Artist deleted successfully',
+      message: 'Transaction deleted successfully',
     });
   } catch (error) {
     console.log(error);
-    res.satus(500).json({
+    res.status(500).json({
       status: 'error',
       error: {
         message: 'Internal Server Error',

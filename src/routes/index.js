@@ -20,6 +20,16 @@ const { getMusics, getMusic, postMusic, putMusic, deleteMusic } = require('../co
 
 // const { getUsers, getUser, postUser, putUser, deleteUser } = require('../controllers/user');
 
+// Transaction Actions
+
+const {
+  getTransactions,
+  getTransaction,
+  postTransaction,
+  putTransaction,
+  deleteTransaction,
+} = require('../controllers/transaction');
+
 // Music
 router.get('/musics', getMusics);
 router.get('/music/:id', getMusic);
@@ -40,5 +50,12 @@ router.post('/artist/', fileUpload('img', null), postArtist);
 // router.post('/user', postUser);
 // router.put('/user/:id', putUser);
 // router.delete('/user/:id', deleteUser);
+
+// Transaction
+router.get('/transactions', getTransactions);
+router.get('/transaction/:id', getTransaction);
+router.post('/transaction', fileUpload('img', null), postTransaction);
+router.put('/transaction/:id', fileUpload('img', null), putTransaction);
+router.delete('/transaction/:id', deleteTransaction);
 
 module.exports = router;

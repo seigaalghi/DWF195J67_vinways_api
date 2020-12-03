@@ -11,18 +11,16 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       User.belongsToMany(models.Music, { through: { model: 'Like' }, as: 'likes' });
       User.belongsToMany(models.Music, { through: { model: 'Playlist' }, as: 'playlists' });
+      User.hasMany(models.Transaction, { as: 'transactions', foreignKey: 'userId' });
     }
   }
   User.init(
     {
       name: DataTypes.STRING,
       email: DataTypes.STRING,
-      premium: DataTypes.BOOLEAN,
       admin: DataTypes.BOOLEAN,
       until: DataTypes.DATE,
-      payment: DataTypes.STRING,
       password: DataTypes.STRING,
-      cancel: DataTypes.BOOLEAN,
     },
     {
       sequelize,
