@@ -30,6 +30,12 @@ const { getUsers, getUser, deleteUser } = require('../controllers/user');
 
 const { getTransactions, getTransaction, postTransaction, putTransaction, deleteTransaction } = require('../controllers/transaction');
 
+// =============================================
+// Transaction Actions
+// =============================================
+
+const { register } = require('../controllers/auth');
+
 // ============================================================================================
 // ROUTING
 // ============================================================================================
@@ -71,5 +77,11 @@ router.get('/transaction/:id', getTransaction);
 router.post('/transaction', fileUpload('img', null), postTransaction);
 router.put('/transaction/:id', fileUpload('img', null), putTransaction);
 router.delete('/transaction/:id', deleteTransaction);
+
+// =============================================
+// Auth
+// =============================================
+
+router.post('/register', register);
 
 module.exports = router;
