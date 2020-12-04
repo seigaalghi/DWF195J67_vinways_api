@@ -31,7 +31,7 @@ exports.fileUpload = (image, audio) => {
 
   const fileFilter = (req, file, cb) => {
     if (file.fieldName === audio) {
-      if (!file.originalname.match(/\.(mp3|MP3|ogg|OGG|m4a|M4A|aac|AAC|flac|FLAC|wav|WAV)$/)) {
+      if (!file.originalname.match(/\.(mp3|MP3|ogg|OGG|flac|FLAC)$/)) {
         req.fileValidationError = {
           message: 'Please select audio files only',
         };
@@ -49,7 +49,7 @@ exports.fileUpload = (image, audio) => {
     cb(null, true);
   };
 
-  const fileSize = 20 * 1024 * 1024;
+  const fileSize = 15 * 1024 * 1024;
 
   const upload = multer({
     storage,

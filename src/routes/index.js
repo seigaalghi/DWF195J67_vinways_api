@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { fileUpload } = require('../../middlewares/fileUpload');
 
 // ============================================================================================
 // Function Import
 // ============================================================================================
+
+// =============================================
+// Middleware
+// =============================================
+
+const { auth, adminAuth } = require('../../middlewares/auth');
+const { fileUpload } = require('../../middlewares/fileUpload');
 
 // =============================================
 // Artist Actions
@@ -36,6 +42,18 @@ const { getTransactions, getTransaction, postTransaction, putTransaction, delete
 
 const { register, login } = require('../controllers/auth');
 
+// =============================================
+// Like Actions
+// =============================================
+
+const { addLike, removeLike } = require('../controllers/like');
+
+// =============================================
+// Playlist Actions
+// =============================================
+
+const { addPlaylist, removePlaylist } = require('../controllers/playlist');
+
 // ============================================================================================
 // ROUTING
 // ============================================================================================
@@ -44,21 +62,21 @@ const { register, login } = require('../controllers/auth');
 // Music
 // =============================================
 
-router.get('/musics', getMusics);
-router.get('/music/:id', getMusic);
-router.post('/music', fileUpload('img', 'audio'), postMusic);
-router.put('/music/:id', fileUpload('img', 'audio'), putMusic);
-router.delete('/music/:id', deleteMusic);
+router.get('/musics', auth, getMusics);
+router.get('/music/:id', auth, getMusic);
+router.post('/music', auth, adminAuth, fileUpload('img', 'audio'), postMusic);
+router.put('/music/:id', auth, adminAuth, fileUpload('img', 'audio'), putMusic);
+router.delete('/music/:id', auth, adminAuth, deleteMusic);
 
 // =============================================
 // Artist
 // =============================================
 
-router.get('/artists', getArtists);
-router.get('/artist/:id', getArtist);
-router.delete('/artist/:id', deleteArtist);
-router.put('/artist/:id', fileUpload('img', null), putArtist);
-router.post('/artist/', fileUpload('img', null), postArtist);
+router.get('/artists', auth, getArtists);
+router.get('/artist/:id', auth, getArtist);
+router.delete('/artist/:id', auth, adminAuth, deleteArtist);
+router.put('/artist/:id', auth, adminAuth, fileUpload('img', null), putArtist);
+router.post('/artist/', auth, adminAuth, fileUpload('img', null), postArtist);
 
 // =============================================
 // User
@@ -66,7 +84,7 @@ router.post('/artist/', fileUpload('img', null), postArtist);
 
 router.get('/users', getUsers);
 router.get('/user/:id', getUser);
-router.delete('/user/:id', deleteUser);
+router.delete('/user/:id', auth, adminAuth, deleteUser);
 
 // =============================================
 // Transaction
@@ -74,9 +92,23 @@ router.delete('/user/:id', deleteUser);
 
 router.get('/transactions', getTransactions);
 router.get('/transaction/:id', getTransaction);
-router.post('/transaction', fileUpload('img', null), postTransaction);
-router.put('/transaction/:id', fileUpload('img', null), putTransaction);
-router.delete('/transaction/:id', deleteTransaction);
+router.post('/transaction', auth, fileUpload('img', null), postTransaction);
+router.put('/transaction/:id', auth, fileUpload('img', null), putTransaction);
+router.delete('/transaction/:id', auth, adminAuth, deleteTransaction);
+
+// =============================================
+// Like
+// =============================================
+
+router.post('/music/like/:musicId', auth, addLike);
+router.delete('/music/like/:musicId', auth, removeLike);
+
+// =============================================
+// Playlist
+// =============================================
+
+router.post('/user/playlist/:musicId', auth, addPlaylist);
+router.delete('/user/playlist/:musicId', auth, removePlaylist);
 
 // =============================================
 // Auth

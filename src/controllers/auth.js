@@ -47,22 +47,22 @@ exports.register = async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-      },
-      process.env.SECRET_TOKEN
-    );
+    const payload = {
+      id: user.id,
+    };
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Registered successfully',
-      data: {
-        user: {
-          email: user.email,
-          token,
+    jwt.sign(payload, process.env.SECRET_TOKEN, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      return res.status(200).json({
+        status: 'success',
+        message: 'Logged in successfully',
+        data: {
+          user: {
+            email,
+            token,
+          },
         },
-      },
+      });
     });
   } catch (error) {
     console.log(error);
@@ -121,22 +121,22 @@ exports.login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-      },
-      process.env.SECRET_TOKEN
-    );
+    const payload = {
+      id: user.id,
+    };
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Logged in successfully',
-      data: {
-        user: {
-          email,
-          token,
+    jwt.sign(payload, process.env.SECRET_TOKEN, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      return res.status(200).json({
+        status: 'success',
+        message: 'Logged in successfully',
+        data: {
+          user: {
+            email,
+            token,
+          },
         },
-      },
+      });
     });
   } catch (error) {
     console.log(error);
