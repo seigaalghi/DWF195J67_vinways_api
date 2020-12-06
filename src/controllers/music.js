@@ -6,32 +6,64 @@ const Joi = require('joi');
 // =================================================================================
 
 exports.getMusics = async (req, res) => {
+  const { id } = req.user;
   try {
-    const musics = await Music.findAll({
-      attributes: {
-        exclude: ['createdAt', 'updatedAt', 'artistId'],
-      },
-      include: [
-        {
-          model: User,
-          through: { attributes: [] },
-          as: 'likes',
-          attributes: ['id', 'name'],
+    const user = await User.findOne({ where: { id } });
+    const until = new Date(user.until).getTime();
+    const now = Date.now();
+    if (until < now) {
+      const musics = await Music.findAll({
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'artistId', 'audio'],
         },
-        {
-          model: Artist,
-          as: 'artist',
-          attributes: ['id', 'name'],
+        include: [
+          {
+            model: User,
+            through: { attributes: [] },
+            as: 'likes',
+            attributes: ['id', 'name'],
+          },
+          {
+            model: Artist,
+            as: 'artist',
+            attributes: ['id', 'name'],
+          },
+        ],
+      });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Musics loaded successfully',
+        data: {
+          musics,
         },
-      ],
-    });
-    res.status(200).json({
-      status: 'success',
-      message: 'Musics loaded successfully',
-      data: {
-        musics,
-      },
-    });
+      });
+    } else {
+      const musics = await Music.findAll({
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'artistId'],
+        },
+        include: [
+          {
+            model: User,
+            through: { attributes: [] },
+            as: 'likes',
+            attributes: ['id', 'name'],
+          },
+          {
+            model: Artist,
+            as: 'artist',
+            attributes: ['id', 'name'],
+          },
+        ],
+      });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Musics loaded successfully',
+        data: {
+          musics,
+        },
+      });
+    }
   } catch (error) {
     console.log(error);
     res.satus(500).json({

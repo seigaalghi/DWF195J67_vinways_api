@@ -1,4 +1,4 @@
-const { User } = require('../../models');
+const { User, Music, Artist, Transaction } = require('../../models');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -45,6 +45,7 @@ exports.register = async (req, res) => {
     const user = await User.create({
       ...body,
       password: hashedPassword,
+      until: new Date(),
     });
 
     const payload = {
@@ -57,10 +58,8 @@ exports.register = async (req, res) => {
         status: 'success',
         message: 'Logged in successfully',
         data: {
-          user: {
-            email,
-            token,
-          },
+          email,
+          token,
         },
       });
     });
@@ -131,12 +130,73 @@ exports.login = async (req, res) => {
         status: 'success',
         message: 'Logged in successfully',
         data: {
-          user: {
-            email,
-            token,
-          },
+          email,
+          token,
         },
       });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: 'error',
+      error: {
+        message: 'Internal Server Error',
+      },
+    });
+  }
+};
+
+// =================================================================================
+// LoadUser
+// =================================================================================
+
+exports.loadUser = async (req, res) => {
+  const { id } = req.user;
+  try {
+    const user = await User.findOne({
+      where: { id },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'password'],
+      },
+      include: [
+        {
+          model: Music,
+          through: { attributes: [] },
+          as: 'playlists',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+          include: [
+            {
+              model: Artist,
+              as: 'artist',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+            {
+              model: User,
+              as: 'likes',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+          ],
+        },
+        {
+          model: Transaction,
+          as: 'transactions',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+        },
+      ],
+    });
+
+    if (!user) {
+      res.status(400).json({
+        status: 'failed',
+        message: `No user found with ID of ${id}`,
+      });
+    }
+    res.status(200).json({
+      status: 'success',
+      message: 'User loaded successfully',
+      data: {
+        user,
+      },
     });
   } catch (error) {
     console.log(error);

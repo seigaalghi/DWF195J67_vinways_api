@@ -1,4 +1,4 @@
-const { Like } = require('../../models');
+const { Like, Music, User, Artist } = require('../../models');
 
 // =================================================================================
 // ADD LIKE
@@ -29,9 +29,30 @@ exports.addLike = async (req, res) => {
       });
     }
 
+    const response = await Music.findOne({
+      where: { id: musicId },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      include: [
+        {
+          model: User,
+          through: { attributes: [] },
+          as: 'likes',
+          attributes: ['id', 'name'],
+        },
+        {
+          model: Artist,
+          as: 'artist',
+          attributes: ['id', 'name'],
+        },
+      ],
+    });
+
     res.status(200).json({
       status: 'success',
       message: 'Liked Successfully',
+      data: {
+        like: response,
+      },
     });
   } catch (error) {
     console.log(error);

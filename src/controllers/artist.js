@@ -1,4 +1,4 @@
-const { Artist, Music } = require('../../models');
+const { Artist, Music, User } = require('../../models');
 const Joi = require('joi');
 
 // =================================================================================
@@ -39,7 +39,15 @@ exports.getArtist = async (req, res) => {
     const artist = await Artist.findOne({
       where: { id },
       attributes: { exclude: ['createdAt', 'updatedAt'] },
-      include: { model: Music, as: 'musics', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      include: {
+        model: Music,
+        include: [
+          { model: User, as: 'likes', attributes: ['id', 'name'], through: { attributes: [] } },
+          { model: Artist, as: 'artist', attributes: { exclude: ['createdAt, updatedAt'] } },
+        ],
+        as: 'musics',
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
     });
 
     if (!artist) {
@@ -83,10 +91,7 @@ exports.postArtist = async (req, res) => {
       img: Joi.string().required(),
     });
 
-    const { error } = schema.validate(
-      { ...req.body, img: file.img ? file.img[0].filename : null },
-      { abortEarly: false }
-    );
+    const { error } = schema.validate({ ...req.body, img: file.img ? file.img[0].filename : null }, { abortEarly: false });
 
     if (error) {
       return res.status(400).send({
@@ -151,10 +156,7 @@ exports.putArtist = async (req, res) => {
       start: Joi.number().required(),
     });
 
-    const { error } = schema.validate(
-      { ...req.body, img: file.img ? file.img[0].filename : null },
-      { abortEarly: false }
-    );
+    const { error } = schema.validate({ ...req.body, img: file.img ? file.img[0].filename : null }, { abortEarly: false });
 
     if (error) {
       return res.status(400).send({

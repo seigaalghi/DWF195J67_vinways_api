@@ -3,13 +3,17 @@ const secret = process.env.SECRET_TOKEN;
 const { User } = require('../models');
 
 exports.auth = async (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) {
+  const header = req.header('Authorization');
+  if (!header) {
     return res.status(400).json({
       status: 'failed',
       message: 'No token! Authorization denied',
     });
   }
+
+  const token = header.replace('Bearer ', '');
+
+  console.log(token);
 
   try {
     const decoded = jwt.verify(token, secret);

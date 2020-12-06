@@ -19,6 +19,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
+      premium: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
       until: {
         type: Sequelize.DATE,
         allowNull: true,

@@ -11,6 +11,7 @@ const router = express.Router();
 
 const { auth, adminAuth } = require('../../middlewares/auth');
 const { fileUpload } = require('../../middlewares/fileUpload');
+const { premium } = require('../../middlewares/premium');
 
 // =============================================
 // Artist Actions
@@ -40,7 +41,7 @@ const { getTransactions, getTransaction, postTransaction, putTransaction, delete
 // Transaction Actions
 // =============================================
 
-const { register, login } = require('../controllers/auth');
+const { register, login, loadUser } = require('../controllers/auth');
 
 // =============================================
 // Like Actions
@@ -114,7 +115,8 @@ router.delete('/user/playlist/:musicId', auth, removePlaylist);
 // Auth
 // =============================================
 
-router.post('/register', register);
-router.post('/login', login);
+router.post('/auth/register', register);
+router.post('/auth/login', login);
+router.get('/auth', auth, premium, loadUser);
 
 module.exports = router;

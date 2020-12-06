@@ -1,4 +1,4 @@
-const { Playlist } = require('../../models');
+const { Playlist, User, Music, Transaction, Artist } = require('../../models');
 
 // =================================================================================
 // ADD PLAYLIST
@@ -29,9 +29,44 @@ exports.addPlaylist = async (req, res) => {
       });
     }
 
+    const response = await User.findOne({
+      where: { id: userId },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'password'],
+      },
+      include: [
+        {
+          model: Music,
+          through: { attributes: [] },
+          as: 'playlists',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+          include: [
+            {
+              model: Artist,
+              as: 'artist',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+            {
+              model: User,
+              as: 'likes',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+          ],
+        },
+        {
+          model: Transaction,
+          as: 'transactions',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+        },
+      ],
+    });
+
     res.status(200).json({
       status: 'success',
       message: 'Added Successfully',
+      data: {
+        user: response,
+      },
     });
   } catch (error) {
     console.log(error);
@@ -45,7 +80,7 @@ exports.addPlaylist = async (req, res) => {
 };
 
 // =================================================================================
-// REMOVE LIKE
+// REMOVE PLAYLIST
 // =================================================================================
 
 exports.removePlaylist = async (req, res) => {
@@ -70,9 +105,44 @@ exports.removePlaylist = async (req, res) => {
       });
     }
 
+    const response = await User.findOne({
+      where: { id: userId },
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'password'],
+      },
+      include: [
+        {
+          model: Music,
+          through: { attributes: [] },
+          as: 'playlists',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+          include: [
+            {
+              model: Artist,
+              as: 'artist',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+            {
+              model: User,
+              as: 'likes',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+          ],
+        },
+        {
+          model: Transaction,
+          as: 'transactions',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+        },
+      ],
+    });
+
     res.status(200).json({
       status: 'success',
       message: 'Removed Successfully',
+      data: {
+        user: response,
+      },
     });
   } catch (error) {
     console.log(error);
