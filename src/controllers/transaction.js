@@ -15,7 +15,7 @@ exports.getTransactions = async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email', 'until'],
+          attributes: ['id', 'name', 'email', 'until', 'premium'],
         },
       ],
     });
@@ -88,6 +88,7 @@ exports.getTransaction = async (req, res) => {
 exports.postTransaction = async (req, res) => {
   const body = req.body;
   const file = req.files;
+  const userId = req.user.id;
   try {
     const schema = Joi.object({
       account: Joi.string().required(),
@@ -99,6 +100,7 @@ exports.postTransaction = async (req, res) => {
       {
         ...req.body,
         img: file.img ? file.img[0].filename : null,
+        userId,
       },
       { abortEarly: false }
     );
@@ -113,7 +115,7 @@ exports.postTransaction = async (req, res) => {
 
     const transaction = await Transaction.create({
       account: body.account,
-      userId: body.userId,
+      userId,
       img: file.img[0].filename,
     });
 

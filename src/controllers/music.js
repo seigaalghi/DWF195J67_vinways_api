@@ -135,7 +135,7 @@ exports.postMusic = async (req, res) => {
   try {
     const schema = Joi.object({
       title: Joi.string().required(),
-      artistId: Joi.number().required(),
+      artistId: Joi.string().required(),
       year: Joi.string().required(),
       img: Joi.string().required(),
       audio: Joi.string().required(),
